@@ -32,7 +32,7 @@ build/
 
 ### VS Code ###
 .vscode/
-
+src/test
 .gitattributes
 mvnw
 mvnw.cmd
