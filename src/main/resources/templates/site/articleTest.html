@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${article.title}">文章标题</title>
+    <!-- 引入 Markdown 样式（GitHub 风格，可选但推荐） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
+    <!-- 引入代码高亮样式（可选，用于美化代码块） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+</head>
+<body>
+<!-- 博客文章详情页核心组件 -->
+<article class="has-image main-article" th:classappend="${article.coverPic == null} ? 'no-image'">
+    <!-- 文章头部 -->
+    <header class="article-header">
+        <!-- 封面图（动态填充，若存在则显示） -->
+        <th:block th:if="${article.coverPic != null}">
+            <div class="article-image">
+                <a th:href="'/article/' + ${article.aid}">
+                    <img th:src="${article.coverPic}"
+                         th:alt="'封面图：' + ${article.title}"
+                         loading="lazy">
+                </a>
+            </div>
+        </th:block>
+
+        <div class="article-details">
+            <!-- 标题和副标题 -->
+            <div class="article-title-wrapper">
+                <h2 class="article-title">
+                    <a th:href="'/article/' + ${article.getAid()}" th:text="${article.title}"></a>
+                </h2>
+                <h3 class="article-subtitle" >副标题</h3>
+            </div>
+
+            <!-- 时间信息 -->
+            <footer class="article-time">
+                <div>
+                    <svg class="icon icon-tabler icon-tabler-calendar-time" ...></svg>
+                    <time class="article-time--published" th:text="${article.create_time}">2025-10-30</time>
+                </div>
+                <div>
+                    <svg class="icon icon-tabler icon-tabler-clock" ...></svg>
+                    <time class="article-time--reading" >5 minute read</time>
+                </div>
+            </footer>
+        </div>
+    </header>
+
+    <!-- 文章正文（动态解析 Markdown） -->
+    <section class="article-content markdown-body">
+        <!-- 隐藏的 Markdown 原始文本（用于解析） -->
+        <div id="markdownContent" style="display: none;" th:text="${article.content}"></div>
+        <!-- 解析后的 HTML 将插入到这里 -->
+    </section>
+
+    <!-- 文章底部 -->
+    <footer class="article-footer">
+        <!-- 标签（假设文章有 tags 字段，存储标签列表） -->
+
+
+        <!-- 版权信息 -->
+        <section class="article-copyright">
+            <svg class="icon icon-tabler icon-tabler-copyright" ...></svg>
+            <span >Licensed under CC BY-NC-SA 4.0</span>
+        </section>
+    </footer>
+</article>
+
+<!-- 引入 Markdown 解析库和代码高亮库 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
+<script>
+    // 解析 Markdown 并渲染到页面
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. 获取数据库中的 Markdown 文本
+        const markdownText = document.getElementById('markdownContent').textContent;
+
+        // 2. 配置 marked.js（开启 XSS 过滤和代码高亮）
+        marked.setOptions({
+            highlight: function(code, lang) {
+                // 代码高亮（需引入 highlight.js）
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(code, { language: lang }).value;
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            breaks: true, // 支持换行
+            gfm: true,    // 支持 GitHub 风格 Markdown
+            sanitize: true // 防 XSS 攻击
+        });
+
+        // 3. 将 Markdown 转换为 HTML 并插入到正文区域
+        const htmlContent = marked.parse(markdownText);
+        document.querySelector('.article-content').innerHTML = htmlContent;
+    });
+</script>
+</body>
+</html>

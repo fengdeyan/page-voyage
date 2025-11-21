@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="~{site/head :: head('分类管理：'+${currentCategory})}"></div>
+<body class="">
+<script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        if(!localStorage.getItem(colorSchemeKey)){
+            localStorage.setItem(colorSchemeKey, "auto");
+        }
+    })();
+</script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended">
+    <div th:replace="~{site/left-aside :: left-aside}"></div>
+    <div th:replace="~{site/right-aside :: right-aside}"></div>
+
+
+    <main class="main full-width">
+        <header>
+            <h3 class="section-title">
+                分类
+            </h3>
+
+            <div class="section-card">
+                <div class="section-details">
+                    <h3 class="section-count" th:text="${articles.getTotal()}+' page'"></h3>
+                    <h1 class="section-term" th:text="${currentCategory}">Syntax</h1>
+
+                </div>
+            </div>
+        </header>
+
+        <section class="article-list--compact">
+
+            <div class="article-list--compact">
+                <th:block th:each="article : ${articles.getRecords()}">
+                    <th:block th:if="${article.coverPic != null}">
+                        <article>
+                            <a th:href="@{/article/{aid}(aid=${article.aid})}">
+                                <div class="article-details">
+                                    <h2 class="article-title" th:text="${article.title}"></h2>
+                                    <footer class="article-time">
+                                        <time datetime='2019-03-11T00:00:00Z' th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}"></time>
+                                    </footer>
+                                </div>
+                                <div class="article-image">
+                                    <img th:src="${article.coverPic}"
+                                         width="120"
+                                         height="120"
+                                         alt="Markdown Syntax Guide"
+                                         loading="lazy">
+
+                                </div>
+
+                            </a>
+                        </article>
+                    </th:block>
+                    <th:block th:unless="${article.coverPic != null}">
+                        <article>
+                            <a th:href="@{/article/{aid}(aid=${article.aid})}">
+                                <div class="article-details">
+                                    <h2 class="article-title" th:text="${article.title}">Math Typesetting</h2>
+                                    <footer class="article-time">
+                                        <time datetime='2019-03-08T00:00:00Z' th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}">Mar 08, 2019</time>
+                                    </footer>
+                                </div>
+                            </a>
+                        </article>
+                    </th:block>
+                </th:block>
+
+        </section>
+        <footer class="site-footer">
+            <section class="copyright">
+                &copy;
+
+                2024 -
+
+                2025 fengdeyan
+            </section>
+
+            <section class="powerby">
+
+                Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.31.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+            </section>
+        </footer>
+
+
+    </main>
+</div>
+<div id="particles-js"></div>
+<script src="/site/js/particles.min.js"></script>
+<!-- 初始化特效 -->
+<script>
+    particlesJS.load('particles-js', '/site/js/particlesjs-config.json', function() {
+        console.log('particles.js loaded - callback');
+    });
+</script>
+
+<style>
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
+<script
+        src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+
+>
+</script><script type="text/javascript" src="/ts/main.99b18171c7f951e7d13c8997de5f6e7770f4fad01e8fb682f6df8f8d83da995b.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+</body>
+</html>

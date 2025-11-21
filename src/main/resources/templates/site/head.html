@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta name='description' content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+    <title th:text="${title!=null?title:'博客后台'}"></title>
+
+    <!-- 1. 修正favicon：只保留正确引用，删除多余样式和尺寸 -->
+    <link rel="icon" th:href="@{/admin/images/favicon.png}" type="image/png" sizes="16x16">
+    <link rel="icon" th:href="@{/admin/images/attach.png}" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" th:href="@{/admin/images/attach.png}" type="image/png">
+
+    <link rel='canonical' href='http://localhost:1313/p/markdown-syntax-guide/'>
+    <script src="/site/js/sakura.js"></script>
+    <!-- 原有CSS -->
+    <link rel="stylesheet" href="/site/css/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css">
+    <!-- 2. 引入自定义CSS（提高优先级，解决样式覆盖）-->
+    <link rel="stylesheet" href="/site/css/custom.css">
+
+    <meta property='og:title' content="Markdown Syntax Guide">
+    <meta property='og:description' content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+    <meta property='og:url' content='http://localhost:1313/p/markdown-syntax-guide/'>
+    <meta property='og:site_name' content='Example Site'>
+    <meta property='og:type' content='article'>
+    <meta property='article:section' content='Post' />
+    <meta property='article:tag' content='markdown' />
+    <meta property='article:tag' content='css' />
+    <meta property='article:tag' content='html' />
+    <meta property='article:tag' content='themes' />
+    <meta property='article:published_time' content='2019-03-11T00:00:00&#43;00:00'/>
+    <meta property='article:modified_time' content='2019-03-11T00:00:00&#43;00:00'/>
+    <meta property='og:image' content='http://localhost:1313/p/markdown-syntax-guide/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg' />
+    <meta name="twitter:title" content="Markdown Syntax Guide">
+    <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/markdown-syntax-guide/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg' />
+    <script type="text/javascript" src="/site/css/main.99b18171c7f951e7d13c8997de5f6e7770f4fad01e8fb682f6df8f8d83da995b.js" defer></script>
+</head>
+<!-- 3. 页面主logo（关键：添加自定义class，用高优先级样式保持圆形）-->
+<body>
+<div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+    <a th:href="@{/}" style="display: flex; align-items: center; text-decoration: none;">
+        <img th:src="@{/site/images/logo.png}" width="45" height="45" alt="Feng&Blog Logo"
+             class="feng-logo"> <!-- 自定义class，对应custom.css -->
+        <span style="font-size: 22px; font-weight: 600; color: #2f353f; margin-left: 12px;">Feng&Blog</span>
+    </a>
+</div>
+</body>
+</html>

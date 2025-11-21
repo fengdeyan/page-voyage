@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--一个namespace=绑定一个对应的dao/mapper接口-->
+<mapper namespace="me.yan.dao.ArticleMapper">
+    <select id="listYears" resultType="long">
+        Select CAST(DATE_FORMAT(FROM_UNIXTIME(create_time/1000), '%Y') AS UNSIGNED) AS `year`
+        FROM article WHERE status = 'publish' GROUP BY `year` ORDER BY `year` DESC
+    </select>
+    <select id="listArticlesBySpecificYear" resultType="map" parameterType="_long">
+        SELECT aid,title,create_time,coverPic FROM article
+        WHERE CAST(DATE_FORMAT(FROM_UNIXTIME(create_time/1000), '%Y') AS UNSIGNED)=#{year}
+        AND status = 'publish'
+        ORDER BY create_time DESC
+    </select>
+</mapper>

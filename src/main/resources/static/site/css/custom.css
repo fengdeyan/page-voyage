@@ -1,0 +1,10 @@
+/* 隐藏导航菜单 #main-menu 的滚动条 */
+#main-menu {
+    scrollbar-width: none; /* Firefox 浏览器 */
+    -ms-overflow-style: none; /* IE 和 Edge 浏览器 */
+}
+
+/* Chrome、Safari 浏览器 */
+#main-menu::-webkit-scrollbar {
+    display: none;
+}

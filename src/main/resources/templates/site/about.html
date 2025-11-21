@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" th:with="title='About|关于'">
+<div th:replace="~{site/head :: head(${title})}"></div>
+<body class="
+    article-page
+    ">
+<script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        if(!localStorage.getItem(colorSchemeKey)){
+            localStorage.setItem(colorSchemeKey, "auto");
+        }
+    })();
+</script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended">
+    <div th:replace="~{site/left-aside :: left-aside}"></div>
+
+
+    <main class="main full-width">
+        <article class="main-article">
+            <header class="article-header">
+
+                <div class="article-details">
+
+
+                    <div class="article-title-wrapper">
+                        <h2 class="article-title">
+                            <a href="/about/">关于我</a>
+                        </h2>
+
+
+
+
+                    </div>
+
+
+
+
+
+                </div>
+
+            </header>
+
+            <section class="article-content">
+
+
+                <p>大家好！我是福州大学计算机专业的一名大三本科生，目前正专注于技术学习与实践，朝着全栈开发方向稳步前进。</p>
+                <p>在专业技能上，我已系统掌握 Java 后端开发相关知识，熟悉 Spring Boot、MyBatis 等主流技术栈，并具备实际项目开发经验；同时，我正积极学习前端开发，逐步探索 HTML、CSS、JavaScript 及 Vue 框架，希望通过跨端学习构建完整的技术体系。</p>
+                <p>课余时间，跑步是我坚持多年的爱好。在奔跑中，我既能释放学习与开发带来的压力，也能沉淀思路、激发对技术问题的思考，这种张弛有度的节奏让我更高效地投入学习。</p>
+                <p>开设这个博客，旨在记录我的技术学习历程、分享编程实践中的心得与踩坑经验，也希望能与同样热爱编程、追求技术成长的朋友交流探讨、共同进步。</p>
+
+            </section>
+
+
+
+
+
+
+        </article>
+
+
+
+
+
+
+        <style>
+            .disqus-container {
+                background-color: var(--card-background);
+                border-radius: var(--card-border-radius);
+                box-shadow: var(--shadow-l1);
+                padding: var(--card-padding);
+            }
+        </style>
+
+        <script>
+            window.addEventListener('onColorSchemeChange', (e) => {
+                if (typeof DISQUS == 'object') {
+                    DISQUS.reset({
+                        reload: true
+                    });
+                }
+            })
+        </script>
+
+
+
+        <footer class="site-footer">
+            <section class="copyright">
+                &copy;
+
+                2024 -
+
+                2025 fengdeyan
+            </section>
+
+            <section class="powerby">
+                Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.31.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+            </section>
+        </footer>
+
+
+
+        <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+
+            <div class="pswp__bg"></div>
+
+
+            <div class="pswp__scroll-wrap">
+
+
+                <div class="pswp__container">
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
+                </div>
+
+
+                <div class="pswp__ui pswp__ui--hidden">
+
+                    <div class="pswp__top-bar">
+
+
+
+                        <div class="pswp__counter"></div>
+
+                        <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                        <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                        <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                        <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+
+
+                        <div class="pswp__preloader">
+                            <div class="pswp__preloader__icn">
+                                <div class="pswp__preloader__cut">
+                                    <div class="pswp__preloader__donut"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                        <div class="pswp__share-tooltip"></div>
+                    </div>
+
+                    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                    </button>
+
+                    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                    </button>
+
+                    <div class="pswp__caption">
+                        <div class="pswp__caption__center"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div><script
+            src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+            defer
+    >
+    </script><script
+            src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+            defer
+    >
+    </script><link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+    ><link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+    >
+
+    </main>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+
+>
+</script><script type="text/javascript" src="/ts/main.99b18171c7f951e7d13c8997de5f6e7770f4fad01e8fb682f6df8f8d83da995b.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<div id="particles-js"></div>
+<script src="/site/js/particles.min.js"></script>
+<script>
+    // 等待 DOM 完全解析完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+        particlesJS.load('particles-js', '/site/js/particlesjs-config.json', function() {
+            console.log('particles.js loaded - callback');
+        });
+    });
+</script>
+
+<style>
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
+</body>
+</html>

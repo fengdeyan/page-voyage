@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--一个namespace=绑定一个对应的dao/mapper接口-->
+<mapper namespace="me.yan.dao.CommentMapper">
+    <select id="batchCountByAids" resultType="java.util.Map">
+        SELECT
+        article_id AS aid,
+        CAST(COUNT(*) AS SIGNED) AS commentsNum
+        FROM comment
+        WHERE article_id IN
+        <foreach collection="aidList" item="aid" open="(" close=")" separator=",">
+            #{aid}
+        </foreach>
+        GROUP BY article_id;
+    </select>
+</mapper>

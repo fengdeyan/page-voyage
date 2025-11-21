@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--一个namespace=绑定一个对应的dao/mapper接口-->
+<mapper namespace="me.yan.dao.UserMapper">
+
+</mapper>

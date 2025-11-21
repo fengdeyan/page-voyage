@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="~{site/head :: head(${article.title})}"></div>
+<body class="
+    article-page
+    ">
+<script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        if(!localStorage.getItem(colorSchemeKey)){
+            localStorage.setItem(colorSchemeKey, "auto");
+        }
+    })();
+</script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended">
+    <div th:replace="~{site/left-aside :: left-aside}"></div>
+    <aside class="sidebar right-sidebar sticky">
+
+
+
+        <section class="widget archives">
+            <div class="widget-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z"/>
+                    <line x1="5" y1="9" x2="19" y2="9" />
+                    <line x1="5" y1="15" x2="19" y2="15" />
+                    <line x1="11" y1="4" x2="7" y2="20" />
+                    <line x1="17" y1="4" x2="13" y2="20" />
+                </svg>
+            </div>
+            <h2 class="widget-title section-title">文章目录</h2>
+
+            <div class="widget--toc">
+                <nav id="TableOfContents">
+                    <ol id="dynamicToc" class="toc-list"></ol>
+                </nav>
+                <div id="tocEmptyTip" style="display: none; padding: 10px; color: #666;">
+                    本文暂无章节目录
+                </div>
+            </div>
+        </section>
+
+
+
+    </aside>
+
+
+    <main class="main full-width">
+        <article class="has-image main-article">
+            <header class="article-header">
+                <div class="article-image">
+                    <a th:href="'/article/'+${article.aid}" th:if="${article.coverPic!=null}">
+                        <img th:src="${article.coverPic}"
+                             th:srcset="|${article.coverPic} 800w, ${article.coverPic} 1600w|"
+                             width="800"
+                             height="534"
+                             loading="lazy"
+                             th:alt="${article.title}" />
+
+                    </a>
+                </div>
+
+
+                <div class="article-details">
+
+
+                    <div class="article-title-wrapper">
+                        <h2 class="article-title">
+                            <a th:href="'/article/'+${article.aid}" th:text="${article.title}">Markdown Syntax Guide</a>
+                        </h2>
+
+
+                        <h3 class="article-subtitle" th:text="${article.slug}">
+                            Sample article showcasing basic Markdown syntax and formatting for HTML elements.
+                        </h3>
+
+                    </div>
+
+
+
+
+
+                    <footer class="article-time">
+
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z"/>
+                                <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+                                <circle cx="18" cy="18" r="4" />
+                                <path d="M15 3v4" />
+                                <path d="M7 3v4" />
+                                <path d="M3 11h16" />
+                                <path d="M18 16.496v1.504l1 1" />
+                            </svg>
+                            <time class="article-time--published" th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}">Mar 11, 2019</time>
+                        </div>
+
+
+
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z"/>
+                                <circle cx="12" cy="12" r="9" />
+                                <polyline points="12 7 12 12 15 15" />
+                            </svg>
+
+
+
+                            <time class="article-time--reading" th:text="|${article.hit_counts}次浏览|">
+                                3 minute read
+                            </time>
+                        </div>
+
+                    </footer>
+
+
+
+                </div>
+
+            </header>
+
+            <section class="article-content">
+                <!-- 隐藏存储原始 Markdown 文本的容器（用于解析，避免 XSS 风险） -->
+                <div id="markdownContent" style="display: none;" th:text="${article.content}"></div>
+
+                <!-- 动态渲染区域：Markdown 解析后的 HTML 会插入这里 -->
+                <div id="dynamicContent"></div>
+            </section>
+
+
+            <footer class="article-footer">
+
+                <section class="article-copyright">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z"/>
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+                    </svg>
+
+
+                    <span>Licensed under CC BY-NC-SA 4.0</span>
+                </section>
+            </footer>
+
+
+
+        </article>
+
+
+
+
+
+
+
+
+        <div class="card">
+            <div class="card-content">
+                <div class="comment-section">
+                    <h3 class="comment-title">发表评论</h3>
+                    <form id="commentForm" class="comment-form">
+                        <div class="form-group">
+                            <label for="username">昵称</label>
+                            <input type="text" id="username" class="form-input" placeholder="请输入你的昵称" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="commentContent">评论内容</label>
+                            <textarea id="commentContent" class="form-textarea" placeholder="分享你的想法..." rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">提交评论</button>
+                    </form>
+                    <h3 class="comment-list-title">评论区 ( <span id="commentCount">0</span> )</h3>
+                    <div id="commentList" class="comment-list-container">
+                        <div class="empty-comment">暂无评论，快来抢沙发～</div>
+                    </div>
+                </div>
+            </div>
+
+
+        <!--隐藏域-->
+            <input type="hidden" id="articleAid" th:value="${article.aid}" />
+
+        <style>
+            .container main-container {
+                background-color: var(--card-background);
+                border-radius: var(--card-border-radius);
+                box-shadow: var(--shadow-l1);
+                padding: var(--card-padding);
+            }
+        </style>
+
+        <script>
+            window.addEventListener('onColorSchemeChange', (e) => {
+                if (typeof DISQUS == 'object') {
+                    DISQUS.reset({
+                        reload: true
+                    });
+                }
+            })
+        </script>
+
+
+
+        <footer class="site-footer">
+            <section class="copyright">
+                &copy;
+
+                2024 -
+
+                2025 fengdeyan
+            </section>
+
+            <section class="powerby">
+                Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.31.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+            </section>
+        </footer>
+
+
+
+        <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+
+            <div class="pswp__bg"></div>
+
+
+            <div class="pswp__scroll-wrap">
+
+
+                <div class="pswp__container">
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
+                </div>
+
+
+                <div class="pswp__ui pswp__ui--hidden">
+
+                    <div class="pswp__top-bar">
+
+
+
+                        <div class="pswp__counter"></div>
+
+                        <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                        <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                        <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                        <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+
+
+                        <div class="pswp__preloader">
+                            <div class="pswp__preloader__icn">
+                                <div class="pswp__preloader__cut">
+                                    <div class="pswp__preloader__donut"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                        <div class="pswp__share-tooltip"></div>
+                    </div>
+
+                    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                    </button>
+
+                    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                    </button>
+
+                    <div class="pswp__caption">
+                        <div class="pswp__caption__center"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div><script
+            src=""integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+            defer
+    >
+    </script><script
+            src=""integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+            defer
+    >
+    </script><link
+            rel="stylesheet"
+            href=""crossorigin="anonymous"
+    ><link
+            rel="stylesheet"
+            href=""crossorigin="anonymous"
+    >
+
+    </main>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+
+>
+</script><script type="text/javascript" src="/site/css/main.99b18171c7f951e7d13c8997de5f6e7770f4fad01e8fb682f6df8f8d83da995b.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+<!--markdown-->
+<!-- 引入 Markdown 解析库 + 代码高亮库 + 样式 -->
+<link rel="stylesheet" href="/markdown/css/github-markdown.min.css">
+<link rel="stylesheet" href="/markdown/css/github.min.css">
+<script src="/markdown/js/marked.min.js"></script>
+
+<!-- 原 Markdown 解析代码保持不变，新增目录生成的触发逻辑 -->
+<script>
+    // 页面加载完成后解析 Markdown 并渲染
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. 获取数据库中的 Markdown 原始文本
+        const mdText = document.getElementById('markdownContent').textContent || '';
+        // 2. 配置 marked.js（开启安全过滤 + 代码高亮 + 适配排版）
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(code, { language: lang }).value;
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            breaks: true,
+            gfm: true,
+            sanitize: false, // 完全关闭安全过滤
+            headerIds: true,
+            headerPrefix: 'md-'
+        });
+
+        // 3. 将 Markdown 转换为 HTML 并插入页面
+        const html = marked.parse(mdText);
+        document.getElementById('dynamicContent').innerHTML = html;
+        // 新增：手动为标题添加唯一 id（带序号）
+        const headings = document.querySelectorAll('#dynamicContent h1, #dynamicContent h2, #dynamicContent h3, #dynamicContent h4, #dynamicContent h5, #dynamicContent h6');
+        headings.forEach((heading, index) => { // 用 index 作为唯一序号
+            const text = heading.textContent.trim();
+            // 生成唯一 id：md-序号-处理后的文本
+            const safeText = text.replace(/\s+/g, '-').replace(/[^\w-]/g, '').toLowerCase(); // 移除特殊字符
+            const headingId = `md-${index}-${safeText}`; // 序号确保唯一性
+            heading.id = headingId;
+        });
+
+        // 4. 生成目录（在 Markdown 解析完成后立即执行）
+        generateTableOfContents();
+
+        // 5. 为脚注添加返回链接功能
+        document.querySelectorAll('.footnote-ref').forEach(ref => {
+            ref.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').slice(1);
+                document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        document.querySelectorAll('.footnote-backref').forEach(backref => {
+            backref.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').slice(1);
+                document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    });
+
+    function generateTableOfContents() {
+        const tocContainer = document.getElementById('dynamicToc');
+        const emptyTip = document.getElementById('tocEmptyTip');
+        const headings = document.querySelectorAll('#dynamicContent h1, #dynamicContent h2, #dynamicContent h3, #dynamicContent h4, #dynamicContent h5, #dynamicContent h6');
+        if (headings.length === 0) {
+            tocContainer.style.display = 'none';
+            emptyTip.style.display = 'block';
+            return;
+        }
+
+        const tocItems = [];
+        headings.forEach(heading => {
+            const level = parseInt(heading.tagName.replace('H',''));
+            const headingId = heading.id;
+            const headingText = heading.textContent.trim();
+            if (!headingId || !headingText) return;
+            tocItems.push({ level, id: headingId, text: headingText });
+        });
+
+        const renderToc = (items, parentLevel = 0) => {
+            const ul = document.createElement('ul');
+            let i = 0;
+            while (i < items.length) {
+                const item = items[i];
+                if (item.level <= parentLevel) break;
+
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                // 关键修改：锚点链接添加 md- 前缀
+                a.href = `#${item.id}`;
+                a.textContent = item.text;
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.getElementById(item.id);
+                    if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    else console.error('未找到标题元素：', item.id);
+                });
+                li.appendChild(a);
+
+                const children = [];
+                let j = i + 1;
+                while (j < items.length && items[j].level > item.level) {
+                    children.push(items[j]);
+                    j++;
+                }
+                if (children.length > 0) {
+                    li.appendChild(renderToc(children, item.level));
+                }
+                ul.appendChild(li);
+                i = j;
+            }
+            return ul;
+        };
+
+        const generatedToc = renderToc(tocItems);
+        if (generatedToc.children.length > 0) {
+            tocContainer.appendChild(generatedToc);
+        } else {
+            tocContainer.style.display = 'none';
+            emptyTip.style.display = 'block';
+        }
+    }
+</script>
+<!--评论区-->
+<!-- 核心：复制博客的样式规则，让评论区和博客长得一样 -->
+<style>
+    :root {
+        /* 亮色模式默认值 */
+        --comment-card-bg: #ffffff;
+        --comment-text-primary: #333333;
+        --comment-text-secondary: #666666;
+        --comment-input-border: #e5e5e5;
+        --comment-btn-bg: #4f8cae;
+        --comment-btn-hover-bg: #359469;
+    }
+
+    /* 暗色模式下的变量覆盖（需与博客主题的暗色变量保持一致） */
+    [data-scheme="dark"] {
+        --comment-card-bg: #2d2d2d;
+        --comment-text-primary: #f5f5f5;
+        --comment-text-secondary: #cccccc;
+        --comment-input-border: #444444;
+        --comment-btn-bg: #3482a3;
+        --comment-btn-hover-bg: #2e7a58;
+    }
+
+    .comment-section {
+        max-width: 720px;
+        margin: 16px auto;
+        padding: 0;
+    }
+    .comment-title, .comment-list-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--comment-text-primary);
+        padding-left: 16px;
+    }
+    .comment-form, .comment-item, .empty-comment {
+        background: var(--comment-card-bg);
+        padding: 16px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 32px;
+    }
+    .form-group {
+        margin-bottom: 16px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--comment-text-secondary);
+        font-size: 14px;
+    }
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--comment-input-border);
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: #f9f9f9;
+        color: var(--comment-text-primary);
+    }
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    .submit-btn {
+        background: var(--comment-btn-bg);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+    .submit-btn:hover {
+        background: var(--comment-btn-hover-bg);
+    }
+    .comment-list-container {
+        gap: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .comment-username {
+        font-weight: 600;
+        color: var(--comment-text-primary);
+        font-size: 14px;
+    }
+    .comment-time {
+        font-size: 12px;
+        color: var(--comment-text-secondary);
+    }
+    .comment-content {
+        font-size: 14px;
+        color: var(--comment-text-secondary);
+        line-height: 1.6;
+    }
+    .empty-comment {
+        text-align: center;
+        padding: 32px;
+        color: var(--comment-text-secondary);
+        font-size: 14px;
+        background: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    /* 暗色模式下输入框背景调整 */
+    [data-scheme="dark"] .form-input,
+    [data-scheme="dark"] .form-textarea {
+        background: #3a3a3a;
+    }
+    [data-scheme="dark"] .empty-comment {
+        background: #3a3a3a;
+    }
+</style>
+
+<!-- 交互逻辑保持不变，不用改 -->
+<script>
+
+    // 获取隐藏元素的值（即 article.aid）
+    const aid = document.getElementById('articleAid').value;
+    const COMMENT_API = {
+        submit: '/comment/submit',
+        getList: '/comment/list?articleId=' + aid
+    };
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchCommentList();
+        bindFormSubmit();
+    });
+
+    function bindFormSubmit() {
+        const form = document.getElementById('commentForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const content = document.getElementById('commentContent').value.trim();
+
+            if (!username || !content) return alert('昵称和内容不能为空～');
+
+            try {
+                const res = await fetch(COMMENT_API.submit, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        content,
+                        articleId: aid,
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('评论提交成功！');
+                    form.reset();
+                    fetchCommentList();
+                } else {
+                    alert('提交失败：' + data.msg);
+                }
+            } catch (err) {
+                console.error('评论提交失败：', err);
+                alert('网络错误，请稍后再试～');
+            }
+        });
+    }
+
+    async function fetchCommentList() {
+        const commentListEl = document.getElementById('commentList');
+        const commentCountEl = document.getElementById('commentCount');
+
+        try {
+            const res = await fetch(COMMENT_API.getList);
+            const data = await res.json();
+            const comments = data.data || [];
+
+            commentCountEl.textContent = comments.length;
+
+            if (comments.length === 0) {
+                commentListEl.innerHTML = '<div class="empty-comment">暂无评论，快来抢沙发～</div>';
+                return;
+            }
+
+            const commentHtml = comments.map(comment => `
+      <div class="comment-item">
+        <div class="comment-header">
+          <span class="comment-username">${comment.nickname}</span>
+          <span class="comment-time">${formatTime(comment.create_time)}</span>
+        </div>
+        <div class="comment-content">${comment.content}</div>
+      </div>
+    `).join('');
+
+            commentListEl.innerHTML = commentHtml;
+        } catch (err) {
+            console.error('获取评论失败：', err);
+            commentListEl.innerHTML = '<div class="empty-comment">加载评论失败，请刷新重试～</div>';
+        }
+    }
+
+    function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+</script>
+<div id="particles-js"></div>
+
+<!-- 引入粒子库 -->
+<script src="/site/js/particles.min.js"></script>
+<!-- 初始化特效 -->
+<script>
+    particlesJS.load('particles-js', '/site/js/particlesjs-config.json', function() {
+        console.log('particles.js loaded - callback');
+    });
+</script>
+
+<style>
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%; /* 通常需要加高度100%，确保全屏覆盖 */
+        z-index: -1;
+    }
+</style>
+</body>
+</html>

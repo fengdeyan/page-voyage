@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" th:with="title='Feng&Blog'">
+<div th:replace="~{site/head :: head(${title})}"></div>
+<body class="">
+<script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        if(!localStorage.getItem(colorSchemeKey)){
+            localStorage.setItem(colorSchemeKey, "auto");
+        }
+    })();
+</script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended">
+    <div th:replace="~{site/left-aside :: left-aside}"></div>
+    <div th:replace="~{site/right-aside :: right-aside}"></div>
+
+
+
+
+    <main class="main full-width">
+
+
+
+
+
+        <section class="article-list">
+            <th:block th:each="article,articleStat : ${articles.records}">
+                <th:block th:if="${article.coverPic != null}">
+                    <article class="has-image">
+                        <header class="article-header">
+                            <div class="article-image">
+                                <a th:href="'/article/' + ${article.aid}" data-pjax-state="">
+                                    <img th:src="${article.coverPic}" loading="lazy" alt="Featured image of post MySQL连接算法和小表驱动大表的原理">
+                                </a>
+                            </div>
+                            <div class="article-details">
+                                <div class="article-title-wrapper">
+                                    <h2 class="article-title">
+                                        <a th:href="'/article/' + ${article.aid}" data-pjax-state="" th:text="${article.title}">
+                                        </a>
+                                    </h2>
+                                    <h3 class="article-subtitle" th:text="${article.slug}"></h3>
+                                </div>
+                                <footer class="article-time">
+                                    <div>
+                                        <svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z"></path>
+                                            <path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"></path>
+                                            <circle cx="18" cy="18" r="4"></circle>
+                                            <path d="M15 3v4"></path>
+                                            <path d="M7 3v4"></path>
+                                            <path d="M3 11h16"></path>
+                                            <path d="M18 16.496V18l1 1"></path>
+                                        </svg>
+                                        <time class="article-time--published" th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}">2025-08-04</time>
+                                    </div>
+                                </footer>
+                            </div>
+                        </header>
+                    </article>
+                </th:block>
+                <th:block th:if="${article.coverPic == null}">
+                    <article class="">
+                        <header class="article-header">
+                            <div class="article-details">
+                                <div class="article-title-wrapper">
+                                    <h2 class="article-title">
+                                        <a th:href="'/article/' + ${article.aid}" th:text="${article.title}"></a>
+                                    </h2>
+                                    <h3 class="article-subtitle" th:text="${article.slug}">
+                                    </h3>
+                                </div>
+                                <footer class="article-time">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z"/>
+                                            <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+                                            <circle cx="18" cy="18" r="4" />
+                                            <path d="M15 3v4" />
+                                            <path d="M7 3v4" />
+                                            <path d="M3 11h16" />
+                                            <path d="M18 16.496v1.504l1 1" />
+                                        </svg>
+                                        <time class="article-time--published" th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}"></time>
+                                    </div>
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z"/>
+                                            <circle cx="12" cy="12" r="9" />
+                                            <polyline points="12 7 12 12 15 15" />
+                                        </svg>
+                                        <time class="article-time--reading">
+                                            1 minute read
+                                        </time>
+                                    </div>
+                                </footer>
+                            </div>
+                        </header>
+                    </article>
+                </th:block>
+            </th:block>
+        </section>
+        <nav class='pagination'>
+            <th:block th:each="i : ${#numbers.sequence(1, articles.pages)}">
+                <th:block th:if="${i == articles.current}"> <!-- 直接用 i 比较，更清晰 -->
+                    <span class='page-link current' th:text="${i}"></span>
+                </th:block>
+                <th:block th:unless="${i == articles.current}">
+                    <a class='page-link' th:href="'/blog/page/' + ${i}" th:text="${i}"></a>
+                </th:block>
+            </th:block>
+        </nav>
+
+        <footer class="site-footer">
+            <section class="copyright">
+                &copy;
+
+                2024 -
+
+                2025 fengdeyan
+            </section>
+
+            <section class="powerby">
+                Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.31.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+            </section>
+        </footer>
+
+    </main>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+
+>
+</script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<div id="particles-js"></div>
+<script src="/site/js/particles.min.js"></script>
+<script>
+    // 等待 DOM 完全解析完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+        particlesJS.load('particles-js', '/site/js/particlesjs-config.json', function() {
+            console.log('particles.js loaded - callback');
+        });
+    });
+</script>
+
+<style>
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
+
+</body>
+</html>

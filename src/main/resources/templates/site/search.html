@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" th:with="title='Search|搜索'">
+<div th:replace="~{site/head :: head(${title})}"></div>
+<body class="template-search">
+<script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        if(!localStorage.getItem(colorSchemeKey)){
+            localStorage.setItem(colorSchemeKey, "auto");
+        }
+    })();
+</script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended">
+    <div th:replace="~{site/left-aside :: left-aside}"></div>
+    <main class="main full-width">
+        <!-- 表单：保留 action="/search"，加 id 方便 JS 操作 -->
+        <form id="path-param-search-form" action="/search" class="search-form" data-json="/search/index.json">
+            <p>
+                <label>搜索</label>
+                <!-- 输入框：加 id 方便获取值，type="search" 更语义化 -->
+                <input id="search-keyword" name="keyword" placeholder="请输入搜索关键词" type="search" />
+            </p>
+            <button type="submit" title="Search">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z"/>
+                    <circle cx="10" cy="10" r="7" />
+                    <line x1="21" y1="21" x2="15" y2="15" />
+                </svg>
+            </button>
+        </form>
+
+
+        <!-- 核心 JS：控制路径参数提交 -->
+        <script>
+            // 监听表单提交事件
+            document.getElementById('path-param-search-form').addEventListener('submit', function(e) {
+                // 1. 阻止表单默认提交（避免传统查询参数模式）
+                e.preventDefault();
+
+                // 2. 获取关键词：去前后空格，避免空提交
+                const keyword = document.getElementById('search-keyword').value.trim();
+
+                // 3. 验证：关键词为空时提示，不跳转
+                if (!keyword) {
+                    alert('请输入搜索关键词');
+                    return;
+                }
+
+                // 4. 编码关键词：处理中文、空格、/ 等特殊字符（关键！避免路径失效）
+                const encodedKeyword = encodeURIComponent(keyword);
+
+                // 5. 拼接 RESTful 路径：/search/编码后的关键词 → 最终路径如 /search/杭州
+                const searchUrl = this.action + '/' + encodedKeyword;
+
+                // 6. 跳转到目标路径
+                window.location.href = searchUrl;
+            });
+        </script>
+
+        <div class="search-result">
+            <h3 class="search-result--title section-title"></h3>
+            <div class="search-result--list article-list--compact">
+                <th:block th:each="article : ${articles}">
+                    <th:block th:if="${article.coverPic != null}">
+                        <article>
+                            <a th:href="@{/article/{aid}(aid=${article.aid})}">
+                                <div class="article-details">
+                                    <h2 class="article-title" th:text="${article.title}"></h2>
+                                    <footer class="article-time">
+                                        <time datetime='2019-03-11T00:00:00Z' th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}"></time>
+                                    </footer>
+                                </div>
+                                <div class="article-image">
+                                    <img th:src="${article.coverPic}"
+                                         width="120"
+                                         height="120"
+                                         alt="Markdown Syntax Guide"
+                                         loading="lazy">
+
+                                </div>
+
+                            </a>
+                        </article>
+                    </th:block>
+                    <th:block th:unless="${article.coverPic != null}">
+                        <article>
+                            <a th:href="@{/article/{aid}(aid=${article.aid})}">
+                                <div class="article-details">
+                                    <h2 class="article-title" th:text="${article.title}">Math Typesetting</h2>
+                                    <footer class="article-time">
+                                        <time datetime='2019-03-08T00:00:00Z' th:text="${#dates.format(new java.util.Date(article.create_time), 'yyyy-MM-dd')}">Mar 08, 2019</time>
+                                    </footer>
+                                </div>
+                            </a>
+                        </article>
+                    </th:block>
+                </th:block>
+            </div>
+        </div>
+
+        <script>
+            window.searchResultTitleTemplate = "#PAGES_COUNT pages (#TIME_SECONDS seconds)"
+        </script><script type="text/javascript" src="/ts/search.js" defer></script>
+
+        <footer class="site-footer">
+            <section class="copyright">
+                &copy;
+
+                2020 -
+
+                2025 Example Person
+            </section>
+
+            <section class="powerby">
+                Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+                Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.31.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+            </section>
+        </footer>
+
+
+    </main>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+
+>
+</script><script type="text/javascript" src="/ts/main.99b18171c7f951e7d13c8997de5f6e7770f4fad01e8fb682f6df8f8d83da995b.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<div id="particles-js"></div>
+<script src="/site/js/particles.min.js"></script>
+<script>
+    // 等待 DOM 完全解析完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+        particlesJS.load('particles-js', '/site/js/particlesjs-config.json', function() {
+            console.log('particles.js loaded - callback');
+        });
+    });
+</script>
+
+<style>
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
+
+</body>
+</html>

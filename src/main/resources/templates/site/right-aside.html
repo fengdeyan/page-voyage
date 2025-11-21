@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<aside class="sidebar right-sidebar sticky" th:fragment="right-aside">
+
+
+    <form id="restful-search-form" action="/search/" class="search-form widget">
+        <p>
+            <label>Search|搜索</label>
+            <!-- 保留原 required、placeholder、name 等属性，仅加 id 方便 JS 获取值 -->
+            <input id="search-keyword" name="keyword" required placeholder="输入你想搜索的文章..." />
+            <button type="submit" title="Search">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z"/>
+                    <circle cx="10" cy="10" r="7" />
+                    <line x1="21" y1="21" x2="15" y2="15" />
+                </svg>
+            </button>
+        </p>
+    </form>
+
+    <!-- 新增 JS：控制 RESTful 路径提交，不影响原样式和校验 -->
+    <script>
+        // 监听表单提交事件
+        document.getElementById('restful-search-form').addEventListener('submit', function(e) {
+            // 1. 阻止表单默认提交（避免传统 ?keyword=xxx 模式）
+            e.preventDefault();
+
+            // 2. 获取关键词：去前后空格（input 的 required 会先做基础校验，这里二次确保）
+            const keyword = document.getElementById('search-keyword').value.trim();
+
+            // 3. 验证：虽然 input 有 required，但这里处理空格场景（比如用户只输入空格）
+            if (!keyword) {
+                alert('请输入有效的搜索关键词~');
+                return;
+            }
+
+            // 4. 编码关键词：处理中文、空格、/ 等特殊字符（关键！避免路径失效）
+            const encodedKeyword = encodeURIComponent(keyword);
+
+            // 5. 拼接 RESTful 路径：去掉原 action 末尾的 /，避免出现 //（如 /search//关键词）
+            const baseUrl = this.action.replace(/\/$/, ''); // 把 "/search/" 转为 "/search"
+            const searchUrl = baseUrl + '/' + encodedKeyword; // 最终路径：/search/关键词
+
+            // 6. 跳转到目标路径（如 localhost:8080/search/杭州）
+            window.location.href = searchUrl;
+        });
+    </script>
+
+
+
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z"/>
+                <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
+            </svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Archives|归档</h2>
+
+
+
+
+        <div class="widget-archive--list">
+            <th:block th:each="year : ${years}">
+                <div class="archives-year">
+                    <a th:href="@{/archives/{year}(year=${year})}">
+                        <span class="year" th:text="${year}">2019</span>
+                        <span class="count">4</span>
+
+                    </a>
+                </div>
+            </th:block>
+
+        </div>
+    </section>
+
+
+
+    <section class="widget tagCloud">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z"/>
+                <line x1="5" y1="9" x2="19" y2="9" />
+                <line x1="5" y1="15" x2="19" y2="15" />
+                <line x1="11" y1="4" x2="7" y2="20" />
+                <line x1="17" y1="4" x2="13" y2="20" />
+            </svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Categories|分类</h2>
+
+        <div class="tagCloud-tags">
+            <th:block th:each="category : ${categorys}">
+                <a th:href="@{/categories/{cg}(cg=${category.mname})}" class="font_size_2" th:text="${category.mname}">
+                </a>
+            </th:block>
+        </div>
+    </section>
+
+
+
+</aside>
+</html>
