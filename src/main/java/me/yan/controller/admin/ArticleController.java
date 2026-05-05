@@ -167,9 +167,11 @@ public class ArticleController extends BaseController {
         return "admin/article_edit";
     }
 
+    @Operation(summary = "删除文章")
     @PostMapping(value = "/delete")
     @ResponseBody
     public APIResponse deleteArticle(
+            @Parameter(name = "cid", description = "文章ID", required = true)
             @RequestParam(name = "cid", required = true)
             Integer cid
     ){

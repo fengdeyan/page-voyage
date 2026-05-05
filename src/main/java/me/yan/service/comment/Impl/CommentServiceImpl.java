@@ -1,16 +1,20 @@
 package me.yan.service.comment.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
+import me.yan.dao.ArticleMapper;
 import me.yan.dao.CommentMapper;
 import me.yan.dto.CommentDto;
 import me.yan.dto.cond.CommentCond;
 import me.yan.pojo.ArticleDomain;
 import me.yan.pojo.CommentDomain;
+import me.yan.service.article.ArticleService;
 import me.yan.service.comment.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +22,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private CommentMapper commentMapper;
+
+    @Autowired
+    ArticleService articleService;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
     @Override
     public void AddComment(CommentDto comment) {
@@ -72,12 +83,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void updateCommentStatus(int cid, String status) {
         CommentDomain commentDomain = commentMapper.selectById(cid);
-        if (null != commentDomain){
-            commentDomain.setStatus(status);
-            commentMapper.updateById(commentDomain);
-        }
+        commentDomain.setStatus(status);
+        commentMapper.updateById(commentDomain);
+        int articleId = commentDomain.getArticle_id();
+        LambdaUpdateWrapper<ArticleDomain> lqw = new LambdaUpdateWrapper<>();
+        lqw.eq(ArticleDomain::getAid, articleId)
+                .setSql("comments_num = comments_num + 1");
+        articleMapper.update(null, lqw);
     }
 
     @Override

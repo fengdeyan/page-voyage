@@ -13,16 +13,24 @@ public class MyInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("uid")) {
-                return true;
+        // 检查cookie中是否有uid
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("uid")) {
+                    Cookie newCookie = new Cookie("uid", cookie.getValue());
+                    newCookie.setMaxAge(60 * 60 * 24 * 7);
+                    response.addCookie(newCookie);
+                    request.getSession().setMaxInactiveInterval(60 * 60 * 24 * 7);
+                    return true;
+                }
             }
         }
-        // 如果没有找到 uid  cookie，检查 session 中是否有登录信息
+        // 如果没有找到 uid cookie，检查 session 中是否有登录信息
         HttpSession session = request.getSession();
         Object attribute = session.getAttribute(WebConst.LOGIN_SESSION_KEY);
         if (attribute != null) {
+            session.setMaxInactiveInterval(60 * 60 * 24 * 7);
             return true;
         }
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

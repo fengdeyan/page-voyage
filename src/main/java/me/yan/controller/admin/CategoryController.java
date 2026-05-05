@@ -1,5 +1,8 @@
 package me.yan.controller.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import me.yan.constant.Types;
 import me.yan.controller.BaseController;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "分类管理", description = "文章分类管理相关接口")
 @Controller
 @RequestMapping("admin/category")
 public class CategoryController extends BaseController {
@@ -21,6 +25,7 @@ public class CategoryController extends BaseController {
         this.adminCommons = adminCommons;
     }
 
+    @Operation(summary = "分类列表", description = "获取所有文章分类")
     @GetMapping(value = "")
     public String index(HttpServletRequest request){
         List<MetaDomain> categories = metaService.getMetasByType(Types.CATEGORY.getType());
@@ -35,12 +40,13 @@ public class CategoryController extends BaseController {
         return "admin/category";
     }
 
+    @Operation(summary = "保存分类", description = "添加或更新分类")
     @PostMapping(value = "/save")
     @ResponseBody
     public APIResponse addCategory(
-            @RequestParam(name = "cname", required = true)
+            @Parameter(description = "分类名称", required = true) @RequestParam(name = "cname", required = true)
             String cname,
-            @RequestParam(name = "mid", required = false)
+            @Parameter(description = "分类ID（更新时使用）") @RequestParam(name = "mid", required = false)
             Integer mid
     ){
         try {
@@ -53,10 +59,12 @@ public class CategoryController extends BaseController {
         }
         return APIResponse.success();
     }
+
+    @Operation(summary = "删除分类", description = "删除指定分类")
     @PostMapping(value = "delete")
     @ResponseBody
     public APIResponse delete(
-            @RequestParam(name = "mid", required = true)
+            @Parameter(description = "分类ID", required = true) @RequestParam(name = "mid", required = true)
             Integer mid
     ){
         System.out.println("mid = " + mid);

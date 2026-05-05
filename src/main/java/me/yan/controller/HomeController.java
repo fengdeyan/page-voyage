@@ -1,6 +1,8 @@
 package me.yan.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import me.yan.constant.WebConst;
 import me.yan.dto.CommentDto;
 import me.yan.dto.cond.ArticleCond;
@@ -12,33 +14,32 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+@Tag(name = "首页接口", description = "首页相关的所有接口")
 @Controller
 public class HomeController extends BaseController {
 
-
+    @Operation(summary = "首页")
     @GetMapping(value = {"/","/index"})
     public String index(@RequestParam(value = "limit", defaultValue = "3") int limit, Model model) {
         //转发请求
-        return this.page(1,limit,model);
+        return page(1,limit,model);
     }
 
+    @Operation(summary = "分页查询文章")
     @GetMapping("/blog/page/{p}")
     public String page(@PathVariable(name = "p") int page,@RequestParam(value = "limit", defaultValue = "3") int limit, Model model) {
-        System.out.println("page->"+page);
         ArticleCond cond = new ArticleCond("blog","publish");
         Page<ArticleDomain> articlesByCond = articleService.getArticlesByCond(cond, page, limit);
-        List<MetaDomain> categorys= metaService.getMetasByType("category");
-        model.addAttribute("categorys",categorys);
-        List<Long> years = articleService.listYears();
-        System.out.println("years:"+years);
-        model.addAttribute("years",years);
-        System.out.println("categorys========"+categorys);
+        loadCommonData( model);
         model.addAttribute("articles", articlesByCond);
         return "site/index";
     }
 
+    @Operation(summary = "查询文章详情")
     @GetMapping("/article/{id}")
     public String article(@PathVariable(name = "id") int id, Model model) {
         ArticleDomain articleById = articleService.getArticleById(id);
@@ -47,6 +48,7 @@ public class HomeController extends BaseController {
         return "site/article";
     }
 
+    @Operation(summary = "提交评论")
     @PostMapping("/comment/submit")
     @ResponseBody
     public CommentResponse submitComment(@RequestBody CommentDto commentDto) {
@@ -54,6 +56,7 @@ public class HomeController extends BaseController {
         return CommentResponse.success("评论提交成功，正在等待审核");
     }
 
+    @Operation(summary = "查询评论列表")    
     @GetMapping("/comment/list")
     @ResponseBody
     public CommentResponse list(@RequestParam(value = "articleId") int articleId) {
@@ -63,36 +66,32 @@ public class HomeController extends BaseController {
         return success;
     }
 
+    @Operation(summary = "查询归档列表")
     @GetMapping("/archives/")
     public String archives(Model model) {
         List<MetaDomain> categorys= metaService.getMetasByType("category");
         Map<Long, List<ArticleDomain>> archivesMap = new LinkedHashMap<>();
         for (Long listYear : articleService.listYears()) {
-            System.out.println("listYear:"+listYear);
             List<ArticleDomain> articleDomains = articleService.listArticlesBySpecificYear(listYear);
-            System.out.println("articleDomains:"+articleDomains);
             archivesMap.put(listYear, articleDomains);
-            System.out.println("archivesMap:"+archivesMap);
         }
         model.addAttribute("archivesMap", archivesMap);
         model.addAttribute("categorys",categorys);
         return "site/archives";
     }
 
+    @Operation(summary = "查询分类列表")
     @GetMapping("/categories/{cg}")
     public String categories(@PathVariable(name = "cg") String cg, Model model) {
-        List<MetaDomain> categorys= metaService.getMetasByType("category");
-        model.addAttribute("categorys",categorys);
         ArticleCond cond = new ArticleCond(cg,"publish");
         Page<ArticleDomain> articlesByCond = articleService.getArticlesByCond(cond, 1, 9999);
-        List<Long> years = articleService.listYears();
-        System.out.println("years:"+years);
-        model.addAttribute("years",years);
         model.addAttribute("articles", articlesByCond);
         model.addAttribute("currentCategory", cg);
+        loadCommonData(model);
         return "site/category";
     }
 
+    @Operation(summary = "查询归档列表")
     @GetMapping("/archives/{year}")
     public String archives(@PathVariable(name = "year") long year, Model model) {
         List<MetaDomain> categorys= metaService.getMetasByType("category");
@@ -103,10 +102,13 @@ public class HomeController extends BaseController {
         model.addAttribute("categorys",categorys);
         return "site/archives";
     }
+    @Operation(summary = "查询搜索列表")
     @GetMapping("/search/")
     public String search(Model model) {
         return "site/search";
     }
+    
+    @Operation(summary = "查询搜索结果")
     @GetMapping("/search/{keyword}")
     public String search(@PathVariable(name = "keyword") String keyword, Model model) {
         List<ArticleDomain> articlesByKeyword = articleService.listArticlesByKeyword(keyword);
@@ -115,13 +117,13 @@ public class HomeController extends BaseController {
         return "site/search";
     }
 
+    @Operation(summary = "查询关于列表")
     @GetMapping("/about/")
     public String about(Model model) {
         return "site/about";
     }
 
     private void updateArticleHit(int id){
-        System.out.println("enter updateArticleHit"+System.currentTimeMillis());
         Integer hget = (Integer) cache.hget("article", "hits");
         int value;
         if (hget==null){
@@ -139,6 +141,14 @@ public class HomeController extends BaseController {
             cache.hset("article", "hits",value,-1);
         }
     }
+
+    private void loadCommonData(Model model){
+        List<MetaDomain> categorys= metaService.getMetasByType("category");
+        model.addAttribute("categorys",categorys);
+        List<Long> years = articleService.listYears();
+        model.addAttribute("years",years);
+    }
+
 
 
 }

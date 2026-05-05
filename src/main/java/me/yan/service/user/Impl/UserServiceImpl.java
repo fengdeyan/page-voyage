@@ -1,6 +1,8 @@
 package me.yan.service.user.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import me.yan.common.enums.ResultCodeEnum;
+import me.yan.common.exception.BusinessException;
 import me.yan.dao.UserMapper;
 import me.yan.pojo.UserDomain;
 import me.yan.service.user.UserService;
@@ -19,6 +21,11 @@ public class UserServiceImpl implements UserService {
         queryWrapper.eq(UserDomain::getUsername, username);
         queryWrapper.eq(UserDomain::getPassword, password);
         UserDomain userDomain = userMapper.selectOne(queryWrapper);
+        if(userDomain == null){
+            throw  new BusinessException(ResultCodeEnum.USER_NOT_EXIST);
+        }else if(!userDomain.getPassword().equals(password)){
+            throw new BusinessException(ResultCodeEnum.LOGIN_ERROR);
+        }
         return userDomain;
     }
 }

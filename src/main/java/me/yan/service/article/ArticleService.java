@@ -7,7 +7,6 @@ import me.yan.pojo.ArticleDomain;
 import me.yan.pojo.MetaDomain;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ArticleService {
     /**
@@ -32,6 +31,10 @@ public interface ArticleService {
      */
     void updateArticleHitById(int id,int hits_exceed);
 
+    /**
+     * 获取所有文章的年份
+     * @return 年份列表
+     */
     List<Long> listYears();
     List<ArticleDomain> listArticlesBySpecificYear(long year);
     /**

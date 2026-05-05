@@ -50,14 +50,18 @@ public class AuthController extends BaseController {
     ){
         try {
             UserDomain userInfo = userService.login(username, password);
-            request.getSession().setAttribute(WebConst.LOGIN_SESSION_KEY, userInfo);  //服务器端存放用户信息
+            HttpSession session = request.getSession();
+            // 1. 设置Session过期时间（可选，单位：秒）
+            session.setMaxInactiveInterval(60 * 60 * 24 * 7); // 7天
+            session.setAttribute(WebConst.LOGIN_SESSION_KEY, userInfo);
             if (StringUtils.isNotBlank(remeber_me)) {
-                response.addCookie(new Cookie("uid",userInfo.getUid()+""));
+                Cookie cookie = new Cookie("uid", userInfo.getUid() + "");
+                cookie.setMaxAge(60 * 60 * 24 * 7);
+                response.addCookie(cookie);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            String msg = "登录失败";
-            return APIResponse.fail(msg);
+            return APIResponse.fail(e.getMessage());
         }
 
         return APIResponse.success();

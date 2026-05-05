@@ -69,11 +69,10 @@
         </dependency>
         <!-- 生成接口文档：SpringDoc OpenAPI（兼容 Spring Boot 3.x） -->
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version> <!-- 最新稳定版 -->
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>4.5.0</version>
         </dependency>
-        <!--mybatis-->
 
         <!--mybatis-plus-->
         <dependency>
@@ -143,6 +142,12 @@
             <version>2.3.3</version>
         </dependency>
 
+        <!--  redis  -->
+        <!-- Spring Boot Redis 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
