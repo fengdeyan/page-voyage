@@ -1,6 +1,5 @@
 package me.yan.service.article.Impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +8,7 @@ import me.yan.dto.cond.ArticleCond;
 import me.yan.pojo.ArticleDomain;
 import me.yan.pojo.MetaDomain;
 import me.yan.service.article.ArticleService;
+import me.yan.service.web.HotArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleMapper articleMapper;
+
+    @Autowired
+    private HotArticleService hotArticleService;
 
     @Override
     public Page<ArticleDomain> getArticlesByCond(ArticleCond cond, int page, int size) {
@@ -86,11 +89,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void addArticle(ArticleDomain articleDomain) {
         articleMapper.insert(articleDomain);
+        hotArticleService.clearHotArticleCache();
     }
 
     @Override
     public void deleteArticleById(int id) {
         articleMapper.deleteById(id);
+        hotArticleService.clearHotArticleCache();
     }
 
     @Override
@@ -104,6 +109,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void modifyArticle(ArticleDomain articleDomain) {
         articleMapper.updateById(articleDomain);
+        hotArticleService.clearHotArticleCache();
     }
 
     @Override

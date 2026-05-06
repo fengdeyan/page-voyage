@@ -29,4 +29,10 @@ public interface ArticleMapper extends BaseMapper<ArticleDomain> {
      * @return
      */
     List<Map<String,Object>> listArticlesBySpecificYear(long year);
+
+    /**
+     * 查询有效文章列表
+     * @return 有效文章列表
+     */
+    List<ArticleDomain> selectValidArticle();
 }
