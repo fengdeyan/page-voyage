@@ -6,6 +6,7 @@ import me.yan.service.comment.CommentService;
 import me.yan.service.meta.MetaService;
 import me.yan.service.site.SiteService;
 import me.yan.service.user.UserService;
+import me.yan.service.web.HotArticleService;
 import me.yan.utils.Commons;
 import me.yan.utils.MapCache;
 import me.yan.utils.OSSUploadUtil;
@@ -33,6 +34,9 @@ public class BaseController {
 
     @Autowired
     public AttachService attachService;
+
+    @Autowired
+    public HotArticleService hotArticleService;
 
     public MapCache cache=MapCache.single();
 }

@@ -24,10 +24,16 @@ public class HomeController extends BaseController {
 
     @Operation(summary = "首页")
     @GetMapping(value = {"/","/index"})
-    public String index(@RequestParam(value = "limit", defaultValue = "3") int limit, Model model) {
+    public String index(@RequestParam(value = "limit", defaultValue = "5") int limit, Model model) {
         //转发请求
-        return page(1,limit,model);
+        List<ArticleDomain> hotArticleList = hotArticleService.getHotArticleList(5);
+        loadCommonData(model);
+        Page<ArticleDomain> hotPage = new Page<>(1, limit, hotArticleList.size());
+        hotPage.setRecords(hotArticleList);
+        model.addAttribute("articles", hotPage);
+        return "site/index";
     }
+
 
     @Operation(summary = "分页查询文章")
     @GetMapping("/blog/page/{p}")
