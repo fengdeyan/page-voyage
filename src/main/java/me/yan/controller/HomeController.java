@@ -3,7 +3,6 @@ package me.yan.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import me.yan.constant.WebConst;
 import me.yan.dto.CommentDto;
 import me.yan.dto.cond.ArticleCond;
 import me.yan.pojo.ArticleDomain;
@@ -130,22 +129,9 @@ public class HomeController extends BaseController {
     }
 
     private void updateArticleHit(int id){
-        Integer hget = (Integer) cache.hget("article", "hits");
-        int value;
-        if (hget==null){
-            value=0;
-        }else {
-            value=hget;
-        }
-        value=value+1;
-        System.out.println("value:"+value);
-        if(value>= WebConst.HITS_EXCEED){
-            value-=WebConst.HITS_EXCEED;
-            articleService.updateArticleHitById(id,WebConst.HITS_EXCEED);
-            cache.hset("article", "hits",value,-1);
-        }else {
-            cache.hset("article", "hits",value,-1);
-        }
+        // 只发消息到 Kafka，直接返回！
+        // 并发能力提升 100 倍！
+        kafkaTemplate.send("article_visit_topic", String.valueOf(id));
     }
 
     private void loadCommonData(Model model){

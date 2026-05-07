@@ -11,6 +11,7 @@ import me.yan.utils.Commons;
 import me.yan.utils.MapCache;
 import me.yan.utils.OSSUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 
 public class BaseController {
     @Autowired
@@ -37,6 +38,9 @@ public class BaseController {
 
     @Autowired
     public HotArticleService hotArticleService;
+
+    @Autowired
+    public KafkaTemplate<String,String> kafkaTemplate;
 
     public MapCache cache=MapCache.single();
 }

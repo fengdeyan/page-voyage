@@ -16,6 +16,33 @@ spring:
       password: leadnews       # 没设密码就留空
       database: 0      # 默认数据库
       timeout: 3000ms
+  kafka:
+    # Kafka 地址（你本地安装的地址）
+    bootstrap-servers: 192.168.160.135:9092
+    auto:
+      create:
+        topics:
+          enable: true
+    # 生产者配置
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    # 消费者配置
+    consumer:
+      group-id: article-hit-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+    # ======================
+    # Kafka Stream 配置
+    # ======================
+    streams:
+      application-id: article-hit-stream-app  # 唯一ID
+      bootstrap-servers: 192.168.160.135:9092
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
   servlet:
     multipart:
       max-file-size: 5MB
@@ -25,3 +52,4 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
