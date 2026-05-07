@@ -48,9 +48,9 @@ public class HomeController extends BaseController {
     @Operation(summary = "查询文章详情")
     @GetMapping("/article/{id}")
     public String article(@PathVariable(name = "id") int id, Model model) {
+        this.updateArticleHit(id);
         ArticleDomain articleById = articleService.getArticleById(id);
         model.addAttribute("article", articleById);
-        this.updateArticleHit(id);
         return "site/article";
     }
 
@@ -130,21 +130,32 @@ public class HomeController extends BaseController {
     }
 
     private void updateArticleHit(int id){
-        Integer hget = (Integer) cache.hget("article", "hits");
-        int value;
-        if (hget==null){
-            value=0;
-        }else {
-            value=hget;
+        String key = "article:hits:counter:" + id;
+
+        // Redis 未注入，直接降级写库
+        if (redisTemplate == null) {
+            articleService.updateArticleHitById(id, 1);
+            return;
         }
-        value=value+1;
-        System.out.println("value:"+value);
-        if(value>= WebConst.HITS_EXCEED){
-            value-=WebConst.HITS_EXCEED;
-            articleService.updateArticleHitById(id,WebConst.HITS_EXCEED);
-            cache.hset("article", "hits",value,-1);
-        }else {
-            cache.hset("article", "hits",value,-1);
+
+        try {
+            // 重点：用 Long 接收，防止自动拆箱 NPE
+            Long count = redisTemplate.opsForValue().increment(key, 1);
+
+            // 判空兜底
+            if (count == null) {
+                articleService.updateArticleHitById(id, 1);
+                return;
+            }
+
+            // 达到阈值批量更新
+            if (count % WebConst.HITS_EXCEED == 0) {
+                articleService.updateArticleHitById(id, WebConst.HITS_EXCEED);
+            }
+
+        } catch (Exception e) {
+            // Redis 挂了 / 超时 → 降级，保证浏览量不丢
+            articleService.updateArticleHitById(id, 1);
         }
     }
 

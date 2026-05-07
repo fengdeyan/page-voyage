@@ -7,4 +7,7 @@ public class WebConst {
     public static final String HOT_ARTICLE_LIST_KEY = "blog:hot:article:list";
     // 缓存过期时间：10分钟，平衡实时性与数据库压力
     public static final int CACHE_EXPIRE_MIN = 10;
+
+    // 文章浏览量计数器 Redis Key 前缀
+    public static final String ARTICLE_HITS_COUNTER_PREFIX = "article:hits:counter:";
 }
