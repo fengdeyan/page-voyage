@@ -3,6 +3,7 @@ package me.yan.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import me.yan.dto.CommentDto;
 import me.yan.dto.cond.ArticleCond;
 import me.yan.pojo.ArticleDomain;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @Tag(name = "首页接口", description = "首页相关的所有接口")
 @Controller
+@Slf4j
 public class HomeController extends BaseController {
 
     @Operation(summary = "首页")
@@ -129,9 +131,9 @@ public class HomeController extends BaseController {
     }
 
     private void updateArticleHit(int id){
-        // 只发消息到 Kafka，直接返回！
-        // 并发能力提升 100 倍！
-        kafkaTemplate.send("article_visit_topic", String.valueOf(id));
+        log.info("【Kafka发送】准备发送消息，文章ID={}", id);
+        kafkaTemplate.send("article_visit", String.valueOf(id));
+        log.info("【Kafka发送】消息已发送到 article_visit topic");
     }
 
     private void loadCommonData(Model model){

@@ -17,28 +17,19 @@ spring:
       database: 0      # 默认数据库
       timeout: 3000ms
   kafka:
-    # Kafka 地址（你本地安装的地址）
     bootstrap-servers: 192.168.160.135:9092
-    auto:
-      create:
-        topics:
-          enable: true
-    # 生产者配置
     producer:
+      retries: 10
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
-    # 消费者配置
     consumer:
-      group-id: article-hit-group
+      group-id: ${spring.application.name}-test
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-    # ======================
-    # Kafka Stream 配置
-    # ======================
     streams:
-      application-id: article-hit-stream-app  # 唯一ID
+      application-id: article-hit-stream-app
       bootstrap-servers: 192.168.160.135:9092
       properties:
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
@@ -52,4 +43,12 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+  level:
+    root: INFO
+    org.apache.kafka.clients.NetworkClient: ERROR
+    org.apache.kafka.streams: ERROR
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+    me.yan: INFO
 
