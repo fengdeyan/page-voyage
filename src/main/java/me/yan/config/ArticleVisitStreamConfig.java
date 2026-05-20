@@ -25,29 +25,19 @@ public class ArticleVisitStreamConfig {
 
     @Bean
     public KStream<String, String> visitStream(StreamsBuilder streamsBuilder) {
-        log.error("【5秒聚合】===== 开始构建流处理拓扑");
         KStream<String, String> stream = streamsBuilder.stream(INPUT_TOPIC);
-        
-        log.error("【5秒聚合】===== 正在监听 topic: {}", INPUT_TOPIC);
 
         KTable<Windowed<String>, Long> countTable = stream
                 .groupBy((key, articleId) -> articleId, Grouped.with(Serdes.String(), Serdes.String()))
-                .windowedBy(TimeWindows.of(WINDOW_SIZE).grace(Duration.ZERO))
-                .count(Materialized.as("article-hit-5s-store"));
-
-        log.error("【5秒聚合】===== 聚合逻辑已注册");
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(5)).grace(Duration.ofSeconds(2))) // 允许迟到2秒
+                .count(Materialized.as("article-hit-5s-store"))
+                .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()));  // 只在窗口关闭时输出
 
         countTable.toStream().foreach((windowedKey, count) -> {
             String articleId = windowedKey.key();
-            
-            log.error("【foreach触发】===== 收到数据：窗口key={}, 访问次数={}", windowedKey, count);
-
             stringRedisTemplate.opsForValue().increment("article:hit:" + articleId, count);
-
-            log.error("【5秒聚合】===== 文章{} → 累加访问量：{}", articleId, count);
+            log.info("【窗口结束】文章 {} 新增 {} 次访问", articleId, count);
         });
-
-        log.error("【5秒聚合】===== 流处理拓扑构建完成，等待数据...");
         return stream;
     }
 }

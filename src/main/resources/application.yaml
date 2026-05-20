@@ -5,19 +5,20 @@ spring:
     name: PageVoyage
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.43.26:3306/page_voyage?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.10.218:3306/page_voyage?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: 192.168.160.135  # 本地Redis地址
+      host: 192.168.10.241  # 本地Redis地址
       port: 6379       # 默认端口
       password: leadnews       # 没设密码就留空
-      database: 0      # 默认数据库
+      database: 1    # 默认数据库
       timeout: 3000ms
+
   kafka:
-    bootstrap-servers: 192.168.160.135:9092
+    bootstrap-servers: 192.168.10.241:9092
     producer:
       retries: 10
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -30,10 +31,13 @@ spring:
 
     streams:
       application-id: article-hit-stream-app
-      bootstrap-servers: 192.168.160.135:9092
+      bootstrap-servers: 192.168.10.241:9092
       properties:
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
         default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        replication.factor: 1
+        num.stream.threads: 1
+        processing.guarantee: exactly_once
   servlet:
     multipart:
       max-file-size: 5MB
