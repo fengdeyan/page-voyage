@@ -37,7 +37,7 @@ public class ArticleServiceImpl implements ArticleService {
                 alw.eq(ArticleDomain::getCategory, cond.getCategory());
             }
         }
-        if (cond.getStatus() != null) {
+        if (cond!=null && cond.getStatus() != null) {
             alw.eq(ArticleDomain::getStatus, cond.getStatus());
         }
         articleMapper.selectPage(ap, alw);
