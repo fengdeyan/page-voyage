@@ -4,7 +4,7 @@ import me.yan.dto.AiSearchResultDto;
 
 public interface AiSearchService {
     /**
-     *
+     * 搜索文章
      * @param query
      * @param topN
      * @return

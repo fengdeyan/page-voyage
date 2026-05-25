@@ -41,8 +41,8 @@ public class AiSearchServiceImpl implements AiSearchService {
     private static void initSynonyms() {
         SYNONYM_MAP.put("学习", Arrays.asList("学习", "教程", "入门", "指南", "学习方法", "自学", "课程", "培训"));
         SYNONYM_MAP.put("编程", Arrays.asList("编程", "代码", "开发", "编程技术", "编码", "程序设计", "软件开发"));
-        SYNONYM_MAP.put("Java", Arrays.asList("java", "jdk", "jvm", "java编程", "java开发", "java基础"));
-        SYNONYM_MAP.put("Python", Arrays.asList("python", "python编程", "python开发", "python基础"));
+        SYNONYM_MAP.put("java", Arrays.asList("java", "jdk", "jvm", "java编程", "java开发", "java基础"));
+        SYNONYM_MAP.put("python", Arrays.asList("python", "python编程", "python开发", "python基础"));
         SYNONYM_MAP.put("数据库", Arrays.asList("数据库", "mysql", "sql", "oracle", "数据存储", "postgres"));
         SYNONYM_MAP.put("算法", Arrays.asList("算法", "数据结构", "算法题", "leetcode", "算法学习", "acm"));
         SYNONYM_MAP.put("前端", Arrays.asList("前端", "javascript", "html", "css", "vue", "react", "angular"));
@@ -54,8 +54,8 @@ public class AiSearchServiceImpl implements AiSearchService {
         SYNONYM_MAP.put("安全", Arrays.asList("安全", "漏洞", "防护", "网络安全", "信息安全", "渗透测试"));
         SYNONYM_MAP.put("云计算", Arrays.asList("云计算", "云服务", "aws", "阿里云", "云原生", "docker"));
         SYNONYM_MAP.put("微服务", Arrays.asList("微服务", "分布式", "服务治理", "springcloud", "microservices"));
-        SYNONYM_MAP.put("Redis", Arrays.asList("redis", "缓存", "nosql", "缓存策略", "分布式缓存"));
-        SYNONYM_MAP.put("Spring", Arrays.asList("spring", "springboot", "springmvc", "spring框架"));
+        SYNONYM_MAP.put("redis", Arrays.asList("redis", "缓存", "nosql", "缓存策略", "分布式缓存"));
+        SYNONYM_MAP.put("spring", Arrays.asList("spring", "springboot", "springmvc", "spring框架"));
     }
 
     private static void initQuestionPatterns() {
@@ -68,7 +68,7 @@ public class AiSearchServiceImpl implements AiSearchService {
     }
 
     private static void initConcepts() {
-        CONCEPT_MAP.put("Java虚拟机", Arrays.asList("JVM", "java虚拟机", "jvm原理", "jvm调优", "java内存模型"));
+        CONCEPT_MAP.put("java虚拟机", Arrays.asList("JVM", "java虚拟机", "jvm原理", "jvm调优", "java内存模型"));
         CONCEPT_MAP.put("分布式系统", Arrays.asList("分布式", "分布式锁", "分布式事务", "一致性", "cap理论"));
         CONCEPT_MAP.put("高并发", Arrays.asList("高并发", "并发编程", "线程安全", "锁", "并发控制"));
         CONCEPT_MAP.put("缓存", Arrays.asList("缓存", "redis", "memcached", "缓存策略", "缓存击穿"));
@@ -140,18 +140,29 @@ public class AiSearchServiceImpl implements AiSearchService {
                     .build();
         }
 
+        // 获取问题类型
         String questionType = analyzeQuestionType(query);
+        // 拆成token关键词
         List<String> originalKeywords = tokenize(query);
+        log.info("拆成的token :{}",originalKeywords);
+        // 拓展查询
         List<String> expandedQuery = expandQueryWithSynonyms(query);
+        log.info("拓展完的token :{}",expandedQuery);
+        // 识别匹配的 concepts
         List<String> matchedConcepts = identifyMatchedConcepts(expandedQuery);
-        
+        log.info("识别的concepts :{}",matchedConcepts);
+        // 计算智能分数
         Map<ArticleDomain, Double> scores = calculateIntelligentScore(query, expandedQuery, questionType, allArticles);
-        
+        log.info("计算的分数：{}",scores);
+        // 计算语义匹配数
         int semanticMatches = countSemanticMatches(expandedQuery, allArticles);
+        log.info("语义匹配数：{}",semanticMatches);
+        // 获取概念匹配数
         int conceptMatches = countConceptMatches(matchedConcepts, allArticles);
-        
+        log.info("概念匹配数:{}",conceptMatches);
+        // 获取匹配列表
         List<AiSearchResultDto.ArticleMatch> matches = scores.entrySet().stream()
-                .filter(entry -> entry.getValue() > 0)
+                .filter(entry -> entry.getValue() > 0.5)
                 .sorted(Map.Entry.<ArticleDomain, Double>comparingByValue().reversed())
                 .limit(topN)
                 .map(entry -> {
@@ -169,7 +180,9 @@ public class AiSearchServiceImpl implements AiSearchService {
                             .build();
                 })
                 .collect(Collectors.toList());
-
+        log.info("匹配列表数量：{}",matches.size());
+        log.info("匹配列表：{}",matches);
+        log.info("================================");
         long responseTime = System.currentTimeMillis() - startTime;
         
         String analysisSummary = generateAnalysisSummary(query, questionType, matchedConcepts, semanticMatches, conceptMatches);
@@ -211,6 +224,9 @@ public class AiSearchServiceImpl implements AiSearchService {
                 .build();
     }
 
+    /**
+     * 分析问题类型
+     */
     private String analyzeQuestionType(String query) {
         for (Map.Entry<String, String> entry : QUESTION_PATTERNS.entrySet()) {
             if (Pattern.matches(entry.getValue(), query)) {
@@ -220,6 +236,7 @@ public class AiSearchServiceImpl implements AiSearchService {
         return "general";
     }
 
+    // 扩展查询
     private List<String> expandQueryWithSynonyms(String query) {
         List<String> tokens = tokenize(query);
         Set<String> expanded = new HashSet<>(tokens);
@@ -239,6 +256,11 @@ public class AiSearchServiceImpl implements AiSearchService {
         return new ArrayList<>(expanded);
     }
 
+    /**
+     * 识别匹配的 concepts
+     * @param expandedQuery
+     * @return
+     */
     private List<String> identifyMatchedConcepts(List<String> expandedQuery) {
         List<String> matched = new ArrayList<>();
         Set<String> querySet = new HashSet<>(expandedQuery);
@@ -525,6 +547,7 @@ public class AiSearchServiceImpl implements AiSearchService {
         return articleService.getArticlesByCond(null, 1, Integer.MAX_VALUE).getRecords();
     }
 
+    // 获取单词列表
     private List<String> tokenize(String text) {
         List<String> tokens = new ArrayList<>();
         if (text == null || text.isEmpty()) {
