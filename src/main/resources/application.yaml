@@ -56,3 +56,10 @@ logging:
     org.springframework.kafka: WARN
     me.yan: INFO
 
+# DashScope 百炼平台配置
+dashscope:
+  api-key: sk-461e5aa0594146b7922b976f6da44903
+  model: qwen-max
+  max-tokens: 1500
+  temperature: 0.7
+

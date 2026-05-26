@@ -64,4 +64,13 @@ public interface ArticleService {
      * @return
      */
     List<ArticleDomain> listArticlesByKeyword(String keyword);
+    
+    /**
+     * 根据关键词搜索文章（带数量限制）
+     * 用于AI检索时获取相关文章作为上下文
+     * @param keyword 搜索关键词
+     * @param limit 返回数量限制
+     * @return 匹配的文章列表
+     */
+    List<ArticleDomain> searchArticles(String keyword, int limit);
 }

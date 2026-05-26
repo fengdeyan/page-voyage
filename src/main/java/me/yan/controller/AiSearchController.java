@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import me.yan.dto.AiSearchResultDto;
 import me.yan.service.aiServer.AiSearchService;
+import me.yan.service.aiServer.RagAiSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,9 @@ public class AiSearchController {
 
     @Autowired
     private AiSearchService aiSearchService;
+    
+    @Autowired
+    private RagAiSearchService ragAiSearchService;
 
     @Operation(summary = "AI检索首页")
     @GetMapping("/")
@@ -58,7 +62,8 @@ public class AiSearchController {
         }
 
         try {
-            AiSearchResultDto result = aiSearchService.searchArticles(query, limit);
+            // 使用RAG增强的AI检索服务
+            AiSearchResultDto result = ragAiSearchService.searchWithRag(query, limit);
             
             response.put("success", true);
             response.put("message", "检索完成");
@@ -84,11 +89,13 @@ public class AiSearchController {
             Model model) {
         
         try {
-            AiSearchResultDto result = aiSearchService.searchArticles(query, 10);
+            // 使用RAG增强的AI检索服务
+            AiSearchResultDto result = ragAiSearchService.searchWithRag(query, 10);
             model.addAttribute("results", result.getMatches());
             model.addAttribute("query", query);
             model.addAttribute("totalCount", result.getTotalCount());
             model.addAttribute("responseTime", result.getResponseTime());
+            model.addAttribute("aiAnswer", result.getAiAnswer());
             
         } catch (Exception e) {
             log.error("AI检索页面跳转异常", e);

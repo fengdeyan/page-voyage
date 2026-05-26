@@ -9,6 +9,7 @@ import me.yan.pojo.ArticleDomain;
 import me.yan.pojo.MetaDomain;
 import me.yan.service.article.ArticleService;
 import me.yan.service.web.HotArticleService;
+import me.yan.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private HotArticleService hotArticleService;
+
+    @Autowired
+    private TokenUtils tokenUtil;
 
     @Override
     public Page<ArticleDomain> getArticlesByCond(ArticleCond cond, int page, int size) {
@@ -117,6 +121,25 @@ public class ArticleServiceImpl implements ArticleService {
         LambdaQueryWrapper<ArticleDomain> alw =
                 new LambdaQueryWrapper<ArticleDomain>();
         alw.like(ArticleDomain::getTitle, keyword);
+        return articleMapper.selectList(alw);
+    }
+
+    @Override
+    public List<ArticleDomain> searchArticles(String keyword, int limit) {
+        LambdaQueryWrapper<ArticleDomain> alw = new LambdaQueryWrapper<>();
+        // 嵌套分组：所有分词条件整体用 OR 关联
+        alw.nested(wr -> {
+            for (String s : tokenUtil.tokenize(keyword)) {
+                wr.or(w -> w.like(ArticleDomain::getTitle, s)
+                        .or()
+                        .like(ArticleDomain::getContent, s));
+            }
+        });
+
+        // 按时间降序排列
+        alw.orderByDesc(ArticleDomain::getCreate_time);
+        // 限制返回数量
+        alw.last("LIMIT " + limit);
         return articleMapper.selectList(alw);
     }
 
