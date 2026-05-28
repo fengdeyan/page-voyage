@@ -8,6 +8,7 @@ import me.yan.config.DashScopeConfig;
 import me.yan.dto.AiSearchResultDto;
 import me.yan.pojo.ArticleDomain;
 import me.yan.service.article.ArticleService;
+import me.yan.utils.TokenUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ public class RagAiSearchService {
 
     private final DashScopeConfig dashScopeConfig;
     private final ArticleService articleService;
+    private final TokenUtils tokenUtil;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -111,9 +113,6 @@ public class RagAiSearchService {
             String content = article.getContent();
             if (content != null && !content.isEmpty()) {
                 content = content.replaceAll("<[^>]+>", "");
-                if (content.length() > 500) {
-                    content = content.substring(0, 500) + "...";
-                }
                 context.append("内容：").append(content).append("\n");
             }
             
@@ -178,7 +177,9 @@ public class RagAiSearchService {
             headers.set("Authorization", "Bearer " + dashScopeConfig.getApiKey());
             
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
+
+            log.info("请求参数：{}", requestBody);
+            log.info("请求头：{}", headers);
             // 发送请求
             ResponseEntity<String> response = restTemplate.postForEntity(
                     DASHSCOPE_API_URL, 
@@ -188,14 +189,16 @@ public class RagAiSearchService {
             
             // 解析响应
             String answer = parseResponse(response.getBody());
-            
+
+            log.info("响应结果：{}", response.getBody());
+            log.info("答案：{}", answer);
             List<String> sources = new ArrayList<>();
             for (ArticleDomain article : articles) {
                 sources.add(article.getTitle());
             }
-            
+            log.info("文章来源：{}",sources);
             String confidence = articles.isEmpty() ? "低" : (articles.size() >= 3 ? "高" : "中");
-            
+            log.info("置信度：{}",confidence);
             return AiSearchResultDto.AiAnswer.builder()
                     .answer(answer)
                     .confidence(confidence)
@@ -249,9 +252,13 @@ public class RagAiSearchService {
         
         AiSearchResultDto.AiAnswer aiAnswer = generateAiAnswer(query, articles);
         
+        // 获取分词后的关键词
+        List<String> keywords = tokenUtil.tokenize(query);
+        
         List<AiSearchResultDto.ArticleMatch> matches = new ArrayList<>();
         for (int i = 0; i < articles.size(); i++) {
             ArticleDomain article = articles.get(i);
+            double relevanceScore = calculateRelevance(article, keywords);
             matches.add(AiSearchResultDto.ArticleMatch.builder()
                     .aid(article.getAid())
                     .title(article.getTitle())
@@ -259,32 +266,67 @@ public class RagAiSearchService {
                     .category(article.getCategory())
                     .coverPic(article.getCoverPic())
                     .create_time(article.getCreate_time())
-                    .relevanceScore(1.0 - (i * 0.1))
+                    .relevanceScore(Math.round(relevanceScore * 100.0) / 100.0)
                     .highlightSnippet(article.getContent() != null && article.getContent().length() > 200 
                             ? article.getContent().substring(0, 200) + "..." 
                             : article.getContent())
                     .build());
         }
         
-        long responseTime = System.currentTimeMillis() - startTime;
+        // 按相关性分数排序
+        matches.sort((a, b) -> Double.compare(b.getRelevanceScore(), a.getRelevanceScore()));
         
-        AiSearchResultDto.AiAnalysis analysis = AiSearchResultDto.AiAnalysis.builder()
-                .questionType("AI智能问答")
-                .questionTypeDesc("基于Qwen-Max大模型的智能问答")
-                .originalKeywords(List.of(query))
-                .expandedKeywords(new ArrayList<>())
-                .matchedConcepts(new ArrayList<>())
-                .semanticMatches(articles.size())
-                .conceptMatches(0)
-                .analysisSummary("已使用Qwen-Max大模型进行智能问答，基于检索到的博客内容生成回答。")
-                .build();
+        long responseTime = System.currentTimeMillis() - startTime;
         
         return AiSearchResultDto.builder()
                 .matches(matches)
                 .totalCount(matches.size())
                 .responseTime(responseTime)
-                .analysis(analysis)
                 .aiAnswer(aiAnswer)
                 .build();
+    }
+    
+    /**
+     * 计算文章与查询关键词的相关性分数
+     * 综合考虑：标题匹配、内容匹配、关键词位置等因素
+     */
+    private double calculateRelevance(ArticleDomain article, List<String> keywords) {
+        if (keywords.isEmpty()) {
+            return 0.5; // 默认相关性
+        }
+        
+        double score = 0.0;
+        int matchedKeywords = 0;
+        
+        String title = article.getTitle() != null ? article.getTitle().toLowerCase() : "";
+        String content = article.getContent() != null ? article.getContent().toLowerCase() : "";
+        
+        for (String keyword : keywords) {
+            String lowerKeyword = keyword.toLowerCase();
+            
+            // 标题匹配权重更高（2倍）
+            if (title.contains(lowerKeyword)) {
+                score += 2.0;
+                matchedKeywords++;
+            }
+            
+            // 内容匹配
+            if (content.contains(lowerKeyword)) {
+                score += 1.0;
+                if (!title.contains(lowerKeyword)) {
+                    matchedKeywords++;
+                }
+            }
+        }
+        
+        // 计算匹配比例
+        double matchRatio = (double) matchedKeywords / keywords.size();
+        
+        // 综合分数 = 基础分数 + 匹配比例奖励
+        double baseScore = score / (keywords.size() * 3.0); // 3.0 = 标题权重2 + 内容权重1
+        double finalScore = baseScore * 0.7 + matchRatio * 0.3;
+        
+        // 确保分数在合理范围内
+        return Math.min(1.0, Math.max(0.1, finalScore));
     }
 }

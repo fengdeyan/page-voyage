@@ -196,60 +196,6 @@
                 </div>
             </div>
 
-            <div id="ai-analysis-panel" class="ai-analysis-panel hidden">
-                <div class="analysis-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search-analytics" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z"/>
-                        <circle cx="10" cy="10" r="7" />
-                        <line x1="21" y1="21" x2="15" y2="15" />
-                        <line x1="15" y1="9" x2="9" y2="15" />
-                        <line x1="9" y1="9" x2="15" y2="15" />
-                        <path d="M18 3v6a6 6 0 0 1 -6 6h-2.5" />
-                        <circle cx="18" cy="3" r="2" />
-                    </svg>
-                    <span class="analysis-title">AI分析报告</span>
-                </div>
-                <div class="analysis-content">
-                    <div id="analysis-summary" class="analysis-summary"></div>
-                    <div class="analysis-row">
-                        <div class="analysis-item">
-                            <span class="analysis-label">问题类型</span>
-                            <span id="analysis-question-type" class="analysis-value">通用查询</span>
-                        </div>
-                        <div class="analysis-item">
-                            <span class="analysis-label">扩展关键词</span>
-                            <span id="analysis-expanded-count" class="analysis-value">0</span>
-                        </div>
-                        <div class="analysis-item">
-                            <span class="analysis-label">匹配概念</span>
-                            <span id="analysis-concept-count" class="analysis-value">0</span>
-                        </div>
-                    </div>
-                    <div class="analysis-row">
-                        <div class="analysis-item">
-                            <span class="analysis-label">语义匹配</span>
-                            <span id="analysis-semantic-matches" class="analysis-value">0</span>
-                        </div>
-                        <div class="analysis-item">
-                            <span class="analysis-label">概念匹配</span>
-                            <span id="analysis-concept-matches" class="analysis-value">0</span>
-                        </div>
-                        <div class="analysis-item">
-                            <span class="analysis-label">响应时间</span>
-                            <span id="analysis-response-time" class="analysis-value">0ms</span>
-                        </div>
-                    </div>
-                    <div class="analysis-concepts">
-                        <span class="analysis-label">识别到的概念：</span>
-                        <div id="analysis-concept-tags" class="concept-tags"></div>
-                    </div>
-                    <div class="analysis-keywords">
-                        <span class="analysis-label">扩展的关键词：</span>
-                        <div id="analysis-keyword-tags" class="keyword-tags"></div>
-                    </div>
-                </div>
-            </div>
-
             <div id="search-results" class="search-results hidden">
                 <div class="results-header">
                     <div class="results-summary">
@@ -342,22 +288,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsCount = document.getElementById('results-count');
     const responseTime = document.getElementById('response-time');
     const queryDisplay = document.getElementById('query-display');
-    const aiAnalysisPanel = document.getElementById('ai-analysis-panel');
     const aiAnswerPanel = document.getElementById('ai-answer-panel');
     const aiAnswerText = document.getElementById('ai-answer-text');
     const answerType = document.getElementById('answer-type');
     const answerConfidence = document.getElementById('answer-confidence');
     const answerSources = document.getElementById('answer-sources');
     const sourcesList = document.getElementById('sources-list');
-    const analysisSummary = document.getElementById('analysis-summary');
-    const analysisQuestionType = document.getElementById('analysis-question-type');
-    const analysisExpandedCount = document.getElementById('analysis-expanded-count');
-    const analysisConceptCount = document.getElementById('analysis-concept-count');
-    const analysisSemanticMatches = document.getElementById('analysis-semantic-matches');
-    const analysisConceptMatches = document.getElementById('analysis-concept-matches');
-    const analysisResponseTime = document.getElementById('analysis-response-time');
-    const analysisConceptTags = document.getElementById('analysis-concept-tags');
-    const analysisKeywordTags = document.getElementById('analysis-keyword-tags');
     const steps = document.querySelectorAll('.step');
 
     input.addEventListener('input', function() {
@@ -431,7 +367,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         thinkingContainer.classList.remove('hidden');
         aiAnswerPanel.classList.add('hidden');
-        aiAnalysisPanel.classList.add('hidden');
         searchResults.classList.add('hidden');
         startThinkingAnimation();
         
@@ -447,12 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (data.data.aiAnswer && data.data.aiAnswer.answer) {
                                 aiAnswerPanel.classList.remove('hidden');
                             }
-                            if (data.data.matches && data.data.matches.length > 0) {
-                                aiAnalysisPanel.classList.remove('hidden');
-                                searchResults.classList.remove('hidden');
-                            } else {
-                                searchResults.classList.remove('hidden');
-                            }
+                            searchResults.classList.remove('hidden');
                         } else {
                             searchResults.classList.remove('hidden');
                         }
@@ -462,7 +392,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (data.success && data.data) {
                         const aiAnswer = data.data.aiAnswer;
-                        const analysis = data.data.analysis;
                         
                         if (aiAnswer && aiAnswer.answer) {
                             aiAnswerText.textContent = aiAnswer.answer;
@@ -482,45 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                         
-                        if (analysis) {
-                            analysisSummary.textContent = analysis.analysisSummary || '';
-                            analysisQuestionType.textContent = analysis.questionTypeDesc || '通用查询';
-                            analysisExpandedCount.textContent = analysis.expandedKeywords ? analysis.expandedKeywords.length : 0;
-                            analysisConceptCount.textContent = analysis.matchedConcepts ? analysis.matchedConcepts.length : 0;
-                            analysisSemanticMatches.textContent = analysis.semanticMatches || 0;
-                            analysisConceptMatches.textContent = analysis.conceptMatches || 0;
-                        } else {
-                            analysisSummary.textContent = '';
-                            analysisQuestionType.textContent = '通用查询';
-                            analysisExpandedCount.textContent = '0';
-                            analysisConceptCount.textContent = '0';
-                            analysisSemanticMatches.textContent = '0';
-                            analysisConceptMatches.textContent = '0';
-                        }
-                        
-                        analysisResponseTime.textContent = data.data.responseTime + 'ms';
                         responseTime.textContent = '(' + data.data.responseTime + 'ms)';
-
-                        if (analysis && analysis.matchedConcepts && analysis.matchedConcepts.length > 0) {
-                            analysisConceptTags.innerHTML = analysis.matchedConcepts.map(concept => 
-                                `<span class="concept-tag">${concept}</span>`
-                            ).join('');
-                        } else {
-                            analysisConceptTags.innerHTML = '<span class="no-concept">未识别到特定概念</span>';
-                        }
-
-                        if (analysis && analysis.expandedKeywords && analysis.expandedKeywords.length > 0) {
-                            const originalKeywords = analysis.originalKeywords || [];
-                            analysisKeywordTags.innerHTML = analysis.expandedKeywords.slice(0, 10).map(keyword => {
-                                const isOriginal = originalKeywords.includes(keyword);
-                                return `<span class="keyword-tag ${isOriginal ? 'original' : 'expanded'}">${keyword}</span>`;
-                            }).join('');
-                            if (analysis.expandedKeywords.length > 10) {
-                                analysisKeywordTags.innerHTML += `<span class="more-keywords">+${analysis.expandedKeywords.length - 10}</span>`;
-                            }
-                        } else {
-                            analysisKeywordTags.innerHTML = '<span class="no-keyword">无扩展关键词</span>';
-                        }
 
                         if (data.data.matches && data.data.matches.length > 0) {
                             emptyResults.classList.add('hidden');

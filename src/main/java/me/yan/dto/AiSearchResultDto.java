@@ -15,7 +15,6 @@ public class AiSearchResultDto {
     private List<ArticleMatch> matches;
     private long totalCount;
     private long responseTime;
-    private AiAnalysis analysis;
     private AiAnswer aiAnswer;
 
     @Data
@@ -31,21 +30,6 @@ public class AiSearchResultDto {
         private Long create_time;
         private Double relevanceScore;
         private String highlightSnippet;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AiAnalysis {
-        private String questionType;
-        private String questionTypeDesc;
-        private List<String> originalKeywords;
-        private List<String> expandedKeywords;
-        private List<String> matchedConcepts;
-        private Integer semanticMatches;
-        private Integer conceptMatches;
-        private String analysisSummary;
     }
 
     @Data

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import me.yan.dto.AiSearchResultDto;
-import me.yan.service.aiServer.AiSearchService;
 import me.yan.service.aiServer.RagAiSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +21,6 @@ import java.util.Map;
 @Slf4j
 public class AiSearchController {
 
-    @Autowired
-    private AiSearchService aiSearchService;
     
     @Autowired
     private RagAiSearchService ragAiSearchService;
@@ -64,12 +61,12 @@ public class AiSearchController {
         try {
             // 使用RAG增强的AI检索服务
             AiSearchResultDto result = ragAiSearchService.searchWithRag(query, limit);
-            
+            log.info("AI检索结果 - 输入: {}, 输出: {}", query, result);
             response.put("success", true);
             response.put("message", "检索完成");
             response.put("data", result);
             
-            log.info("AI检索请求 - 查询词: {}, 结果数: {}", query, result.getTotalCount());
+            log.info("AI检索请求 - 查询词: {}, 结果: {}", query, result);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
